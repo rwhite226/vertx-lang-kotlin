@@ -343,8 +343,11 @@ fun Vertx.dispatcher() : CoroutineDispatcher {
  * @param block the coroutine code
  */
 fun Context.dispatcher() : CoroutineDispatcher {
-  require(!isMultiThreadedWorkerContext, { "Must not be a multithreaded worker verticle." })
-  return VertxCoroutineExecutor(this).asCoroutineDispatcher()
+    require(!isMultiThreadedWorkerContext) { "Must not be a multithreaded worker verticle." }
+    return get<CoroutineDispatcher>("CoroutineDispatcher")
+            ?: VertxCoroutineExecutor(this)
+                    .asCoroutineDispatcher()
+                    .also { put("CoroutineDispatcher", it) }
 }
 
 private class VertxScheduledFuture(
